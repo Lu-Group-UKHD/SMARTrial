@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Exploratory analysis and quality check of the SMARTrial proteomic/metabolomic data</title>
+
+<script src="site_libs/header-attrs-2.14/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SMARTrial</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Exploratory analysis and quality check of
+the SMARTrial proteomic/metabolomic data</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2024-01-09
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>SMARTrial/analysis/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20220425code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20220425)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20220425code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20220425)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongnoversioncontrol">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>Repository version:</strong> no
+version control </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongnoversioncontrol"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Tracking code development and connecting the code version to the
+results is critical for reproducibility. To start using Git, open the
+Terminal and type <code>git init</code> in your project directory.</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+This project is not being versioned with Git. To obtain the full
+reproducibility benefits of using workflowr, please see
+<code>?wflow_start</code>.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="set-up" class="section level1">
+<h1>Set up</h1>
+</div>
+<div id="process-patient-clinical-annotations" class="section level1">
+<h1>Process patient clinical annotations</h1>
+<pre class="r"><code>load(&quot;../data/01_preprocessed_invivo_data.RData&quot;)
+df_invivo &lt;- df_invivo %&gt;% select(-c(Sonstige_Mutationen, lines_pretreatment_cat,
+                                     time_from_ED, time_from_ED_dich, Sonstige_Aberrationen,
+                                     Response_def_parameter_final, Response_not_evaluable,
+                                     Reason_response_not_evaluable, Resp_protocol_comment,
+                                     time_diarel_treatment)) %&gt;%
+  mutate(across(NPM1:`Trisomy 8q24`, as.numeric)) %&gt;%
+  mutate(Resp_protocol = ifelse(Resp_protocol == &quot;na&quot;, NA, Resp_protocol))
+
+patAnno &lt;- DataFrame(df_invivo)
+rownames(patAnno) &lt;- patAnno$patientID</code></pre>
+<div id="read-pdated-patient-annotations" class="section level2">
+<h2>Read pdated patient annotations</h2>
+<pre class="r"><code>patTabNew &lt;- readxl::read_xlsx(&quot;../data/20230807_SMART_SC006_final.xlsx&quot;)</code></pre>
+<div
+id="final-smartrail-patients-that-are-not-in-the-proteomic-annotation"
+class="section level3">
+<h3>Final SMARTrail patients that are not in the proteomic
+annotation</h3>
+<pre class="r"><code>filter(df_invivo, !patientID %in% patTabNew$SMART_ID) %&gt;% arrange(patientID)</code></pre>
+<pre><code># A tibble: 27 × 47
+   patien…¹ Date_birth Sex   Date_of_…²   age Date_rep…³ time_…⁴ mater…⁵ tumor…⁶
+   &lt;chr&gt;    &lt;date&gt;     &lt;fct&gt; &lt;date&gt;     &lt;dbl&gt; &lt;date&gt;     &lt;drtn&gt;  &lt;fct&gt;     &lt;dbl&gt;
+ 1 S005     1987-07-15 Male  2018-04-27    31 2018-05-02 5 days  LN           70
+ 2 S008     1962-07-15 Male  2018-05-04    56 2018-05-06 2 days  PB           96
+ 3 S012     1937-07-15 Male  2018-06-11    81 2018-06-13 2 days  BM           59
+ 4 S019     1967-07-15 Fema… 2018-07-18    51 2018-07-20 2 days  BM           60
+ 5 S022     1947-07-15 Male  2018-08-07    71 2018-08-10 3 days  LN           77
+ 6 S025     1994-07-15 Male  2018-10-02    24 2018-10-04 2 days  PB           88
+ 7 S027     1954-07-15 Male  2018-10-04    64 2018-10-10 6 days  PB           79
+ 8 S035     1943-07-15 Male  2018-11-23    75 2018-11-28 5 days  PB           90
+ 9 S040     1945-07-15 Male  2019-01-08    74 2019-01-10 2 days  PB           76
+10 S042     1941-07-15 Male  2019-01-23    78 2019-01-25 2 days  PB           57
+# … with 17 more rows, 38 more variables: date_diagnosis &lt;date&gt;,
+#   diagnosis &lt;chr&gt;, Pretreatment &lt;chr&gt;, lines_pretreatment &lt;dbl&gt;,
+#   pretreatment_spec &lt;chr&gt;, NPM1 &lt;dbl&gt;, CEBPA &lt;dbl&gt;, FLT3 &lt;dbl&gt;,
+#   FLT3_ITD_ratio &lt;dbl&gt;, FLT3_TKD &lt;dbl&gt;, IDH1 &lt;dbl&gt;, IDH2 &lt;dbl&gt;,
+#   `bcr-abl` &lt;dbl&gt;, IGHV.status &lt;dbl&gt;, TP53 &lt;dbl&gt;, BIRC3 &lt;dbl&gt;, CAK &lt;dbl&gt;,
+#   MLL_rearragement &lt;dbl&gt;, `t(15;17)` &lt;dbl&gt;, Del17p &lt;dbl&gt;, `Del 11q` &lt;dbl&gt;,
+#   `Del 13q` &lt;dbl&gt;, Trisomie_12q13 &lt;dbl&gt;, `Trisomy 8q24` &lt;dbl&gt;, …
+# ℹ Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names</code></pre>
+</div>
+<div
+id="patients-included-currently-but-not-in-the-final-smartrial-list"
+class="section level3">
+<h3>Patients included currently but not in the final SMARTrial list</h3>
+<pre class="r"><code>filter(patTabNew, !SMART_ID %in% df_invivo$patientID) %&gt;% arrange(SMART_ID)</code></pre>
+<pre><code># A tibble: 13 × 21
+   SMART_ID DIETR…¹ OMZ_ID SC_SA…² SC_AL…³ SEX   MATER…⁴ DISEASE INITI…⁵ COMMENT
+   &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  
+ 1 A003     18SCPB… OMZP0… SC_H_S… A1200   m     PB      CLL     Day of… &lt;NA&gt;   
+ 2 A006     19LN01… NA     SC_H_S… A1872   m     LN      CLL     Day of… &lt;NA&gt;   
+ 3 A008     19LN01… NA     SC_H_S… A1856   m     LN      DLBCL   Day of… &lt;NA&gt;   
+ 4 A010     19SCPB… OMZP0… SC_H_S… A1208   m     PB      DLBCL   Day of… &lt;NA&gt;   
+ 5 A012     19LN01… NA     SC_H_S… A1880   f     LN      DLBCL   Day of… &lt;NA&gt;   
+ 6 DRP      20SCPB… OMZP0… SC_H_S… A1616   m     PB      CLL     Day of… &lt;NA&gt;   
+ 7 DRP      20SCPB… OMZP0… SC_H_S… A1608   m     PB      CLL     Day of… &lt;NA&gt;   
+ 8 DRP      21SCPB… OMZP0… SC_H_S… A1600   m     PB      CLL     Day of… &lt;NA&gt;   
+ 9 DRP      21LN03… NA     SC_H_S… A1864   m     LN      FL      Day of… &lt;NA&gt;   
+10 DRP      19SCPB… OMZP0… SC_H_S… A1888   m     PB      CLL     Day of… &lt;NA&gt;   
+11 DRP      20SCPB… OMZP0… SC_H_S… A1624   m     PB      AML     Day of… &lt;NA&gt;   
+12 S059     19LN01… NA     SC_H_S… A1904   f     LN      FL      Day of… &lt;NA&gt;   
+13 S084     20SCBM… OMZP0… SC_H_S… A1576   m     BM      AML     Day of… &lt;NA&gt;   
+# … with 11 more variables: CELL_NUMBER_THAWED &lt;chr&gt;, ENRICHMENT &lt;chr&gt;,
+#   DEAD_CELL_REMOVAL &lt;chr&gt;, THAW_BATCH &lt;dbl&gt;, THAW_DATE &lt;dttm&gt;,
+#   PROTEOMICS &lt;dbl&gt;, METABOLOMICS &lt;dbl&gt;, GENOMICS &lt;dbl&gt;,
+#   BACKUP_PELLET_AVAILABLE &lt;dbl&gt;, `CELL_NUMBER_SUBMITTED (x10^6)` &lt;chr&gt;,
+#   PERCENT_VIABILITY &lt;dbl&gt;, and abbreviated variable names ¹​DIETRICH_ID,
+#   ²​SC_SAMPLE_ID, ³​SC_ALIQUOT_ID, ⁴​MATERIAL, ⁵​INITIAL_FREEZING
+# ℹ Use `colnames()` to see all variable names</code></pre>
+<p>These samples are indeed not in the SMARTrial drug screen data,
+therefore I don’t have their in vivo response data.</p>
+</div>
+<div
+id="wehter-the-information-is-consistent-among-the-overlapped-samples"
+class="section level3">
+<h3>Wehter the information is consistent among the overlapped
+samples?</h3>
+<pre class="r"><code>compareTab &lt;- patTabNew %&gt;% select(SMART_ID, SEX, MATERIAL, DISEASE,SC_ALIQUOT_ID) %&gt;%
+  filter(SMART_ID %in% intersect(patTabNew$SMART_ID, df_invivo$patientID)) %&gt;%
+  left_join(select(df_invivo, patientID, Sex, material, diagnosis) %&gt;%
+              mutate(Sex = ifelse(Sex == &quot;Male&quot;,&quot;m&quot;,&quot;f&quot;)), by = c(SMART_ID = &quot;patientID&quot;))
+compareTab %&gt;%
+  filter(SEX!=Sex | MATERIAL != material | DISEASE != diagnosis)</code></pre>
+<pre><code># A tibble: 3 × 8
+  SMART_ID SEX   MATERIAL DISEASE   SC_ALIQUOT_ID Sex   material diagnosis
+  &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;         &lt;chr&gt; &lt;fct&gt;    &lt;chr&gt;    
+1 S020     f     PB       CLL       A1304         m     PB       T-PLL    
+2 S082     f     PB       MZL/DLBCL A1560         f     PB       DLBCL    
+3 S013     f     PB       CLL/DLBCL A1265         f     PB       DLBCL    </code></pre>
+<p>Based on Onkostar annotation, S020 should be a male T-PLL patient.
+S082 and S013 are DLBCL with transformation from MZL and CLL. Here, they
+will be annotated as DLBCL</p>
+</div>
+<div id="create-new-annotation-table" class="section level3">
+<h3>Create new annotation table</h3>
+<p>Also fix some potential issues</p>
+<pre class="r"><code>patAnno &lt;- patTabNew %&gt;% 
+  left_join(df_invivo, by = c(SMART_ID = &quot;patientID&quot;)) %&gt;%
+  mutate(sampleID = str_remove(SC_SAMPLE_ID, &quot;SC_H_&quot;),
+         Aliquot.cell.number = as.numeric(`CELL_NUMBER_SUBMITTED (x10^6)`),
+         DISEASE = ifelse(DISEASE %in% c(&quot;MZL/DLBCL&quot;,&quot;CLL/DLBCL&quot;),&quot;DLBCL&quot;,DISEASE)
+         ) %&gt;%
+  mutate(DISEASE = ifelse(SMART_ID == &quot;S020&quot;,&quot;T-PLL&quot;,DISEASE),
+         SEX = ifelse(SMART_ID == &quot;S020&quot;,&quot;m&quot;,SEX)) %&gt;%
+  dplyr::select(-Sex, -material, -diagnosis) %&gt;%
+  column_to_rownames(&quot;sampleID&quot;) %&gt;% DataFrame()
+patAnno$sampleID &lt;- rownames(patAnno)
+dim(patAnno)</code></pre>
+<pre><code>[1] 66 66</code></pre>
+</div>
+</div>
+</div>
+<div id="proteomic-analysis" class="section level1">
+<h1>Proteomic analysis</h1>
+<div id="read-new-dataset-from-karim" class="section level2">
+<h2>Read new dataset from Karim</h2>
+<pre class="r"><code>protTab &lt;- read_tsv(&quot;../data/20230916_SMARTTrail_oldPrep_2nd_TimsTOF.pg_matrix.tsv&quot;)
+
+#whether no duplication of protein groups?
+all(!duplicated(protTab$Protein.Group))</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>exprMat &lt;- select(protTab, Protein.Group, starts_with(&quot;A&quot;)) %&gt;%
+  column_to_rownames(&quot;Protein.Group&quot;) %&gt;% as.matrix()
+
+colnames(exprMat) &lt;- patAnno[match(colnames(exprMat), patAnno$SC_ALIQUOT_ID),]$sampleID
+
+rowAnno &lt;- select(protTab, !starts_with(&quot;A&quot;)) %&gt;%
+  column_to_rownames(&quot;Protein.Group&quot;) %&gt;% 
+  dplyr::rename(protein_ids = &quot;Protein.Ids&quot;, protein_names = &quot;Protein.Names&quot;) %&gt;%
+  DataFrame()
+
+protData &lt;- SummarizedExperiment(assays = list(count = exprMat),
+                                 rowData = rowAnno,
+                                 colData = patAnno[colnames(exprMat),])</code></pre>
+</div>
+<div id="quality-check" class="section level2">
+<h2>Quality check</h2>
+<div id="patient-annotations" class="section level3">
+<h3>Patient annotations</h3>
+<p>Read and preprocess</p>
+<pre class="r"><code>rowData(protData)$ID &lt;- rowData(protData)$protein_ids
+rowData(protData)$name &lt;- rowData(protData)$protein_names
+rowData(protData)$protein_ids &lt;- NULL
+rowData(protData)$protein_names &lt;- NULL
+dim(protData)</code></pre>
+<pre><code>[1] 10244    66</code></pre>
+</div>
+<div id="examin-the-data-distrubution" class="section level3">
+<h3>Examin the data distrubution</h3>
+<pre class="r"><code>countMat &lt;- assay(protData)
+dim(countMat)</code></pre>
+<pre><code>[1] 10244    66</code></pre>
+<pre class="r"><code>boxplot(log2(countMat))</code></pre>
+<p><img src="figure/exploratoryAnalysis_newData_corrected.Rmd/unnamed-chunk-10-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="missing-value-per-sample" class="section level3">
+<h3>Missing value per sample</h3>
+<pre class="r"><code>plotTab &lt;- tibble(sample = protData$sampleID, 
+                  perNA = colSums(is.na(countMat))/nrow(countMat),
+                  total = colSums(log2(countMat), na.rm=TRUE),
+                  medVal = colMedians(log2(countMat), na.rm=TRUE),
+                  diagnosis = protData$DISEASE, 
+                  material = protData$MATERIAL)
+ggplot(plotTab, aes(x=sample, y=1-perNA, fill = material)) +
+    geom_bar(stat = &quot;identity&quot;) +
+    ylab(&quot;completeness&quot;) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0)) +
+    facet_wrap(~diagnosis, scale = &quot;free_x&quot;, ncol=3)</code></pre>
+<p><img src="figure/exploratoryAnalysis_newData_corrected.Rmd/unnamed-chunk-11-1.png" width="1920" style="display: block; margin: auto;" /></p>
+</div>
+<div id="missing-value-cut-off-versus-number-of-remaining-proteins"
+class="section level3">
+<h3>Missing value cut-off versus number of remaining proteins</h3>
+<pre class="r"><code>missPer &lt;- rowSums(is.na(countMat))/ncol(countMat)
+sumTab &lt;- lapply(seq(0,1,by = 0.01), function(x) tibble(cut = x, freq = sum(missPer &lt; x)/length(missPer))) %&gt;% bind_rows()
+ggplot(sumTab, aes(x=cut, y=freq)) + geom_line() + xlab(&quot;Missing value cut-off&quot;) + ylab(&quot;Percent remaining&quot;) +
+  scale_x_continuous(breaks = seq(0,1, 0.1))</code></pre>
+<p><img src="figure/exploratoryAnalysis_newData_corrected.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="total-intensity" class="section level3">
+<h3>Total intensity</h3>
+<pre class="r"><code>ggplot(plotTab, aes(x=sample, y=total, fill = material)) +
+    geom_bar(stat = &quot;identity&quot;) +
+    ylab(&quot;total intensity&quot;) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0)) +
+    facet_wrap(~diagnosis, scale = &quot;free_x&quot;, ncol=3) </code></pre>
+<p><img src="figure/exploratoryAnalysis_newData_corrected.Rmd/unnamed-chunk-13-1.png" width="1920" style="display: block; margin: auto;" /></p>
+</div>
+<div id="median-intensity" class="section level3">
+<h3>Median Intensity</h3>
+<pre class="r"><code>ggplot(plotTab, aes(x=sample, y=medVal, fill = material)) +
+    geom_bar(stat = &quot;identity&quot;) +
+    ylab(&quot;Median intensity&quot;) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0)) +
+    facet_wrap(~diagnosis, scale = &quot;free_x&quot;, ncol=3) </code></pre>
+<p><img src="figure/exploratoryAnalysis_newData_corrected.Rmd/unnamed-chunk-14-1.png" width="1920" style="display: block; margin: auto;" /></p>
+</div>
+<div id="remove-proteins-with-more-than-50-missing-values"
+class="section level3">
+<h3>Remove proteins with more than 50% missing values</h3>
+<pre class="r"><code>cut=0.5
+protData_filter &lt;- protData[rowSums(is.na(assay(protData)))/ncol(protData) &lt;= cut,]
+dim(protData_filter)</code></pre>
+<pre><code>[1] 8312   66</code></pre>
+<pre class="r"><code>#assayNames(protData_filter) &lt;- &quot;norm&quot;</code></pre>
+</div>
+<div id="vsn" class="section level3">
+<h3>VSN</h3>
+<pre class="r"><code>assay(protData_filter) &lt;- vsn::justvsn(assay(protData_filter))</code></pre>
+</div>
+<div id="mean-sd-relationship" class="section level3">
+<h3>Mean Sd relationship</h3>
+<pre class="r"><code>vsn::meanSdPlot(assay(protData_filter))</code></pre>
+<p><img src="figure/exploratoryAnalysis_newData_corrected.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="impute-missing-values-using-bpca" class="section level3">
+<h3>Impute missing values using bpca</h3>
+<p>This is a method for imputing missing not at random data.</p>
+<pre class="r"><code>protData_imp &lt;- DEP::impute(protData_filter, fun = &quot;bpca&quot;)</code></pre>
+<pre class="r"><code>#add bpca imputed data
+assays(protData_filter)[[&quot;imputed&quot;]] &lt;- assay(protData_imp)</code></pre>
+</div>
+<div id="created-the-final-object-for-analysis" class="section level3">
+<h3>Created the final object for analysis</h3>
+<pre class="r"><code>protSmart &lt;- protData_filter
+protSmart_raw &lt;- protData
+save(protSmart, protSmart_raw, file = &quot;../output/protSmart_new.RData&quot;)</code></pre>
+</div>
+</div>
+<div id="exploratory-data-analysis" class="section level2">
+<h2>Exploratory data analysis</h2>
+<div id="pca" class="section level3">
+<h3>PCA</h3>
+<pre class="r"><code>exprMat &lt;- assays(protSmart)[[&quot;imputed&quot;]]
+sds &lt;- genefilter::rowSds(exprMat)
+exprMat &lt;- exprMat[order(sds, decreasing = TRUE)[1:5000],]
+
+smpAnno &lt;- colData(protSmart) %&gt;% as_tibble()
+
+pcRes &lt;- prcomp(t(exprMat), scale. = FALSE, center = TRUE)
+
+pcTab &lt;- pcRes$x[,1:10] %&gt;% 
+    as_tibble(rownames = &quot;sampleID&quot;) %&gt;%
+    left_join(smpAnno)</code></pre>
+<p>PC1 versus PC2</p>
+<pre class="r"><code>ggplot(pcTab, aes(x=PC1, y=PC2, col = DISEASE, shape= MATERIAL)) +
+    geom_point() +
+    ggrepel::geom_text_repel(aes(label = SC_ALIQUOT_ID)) +
+    theme_bw()</code></pre>
+<p><img src="figure/exploratoryAnalysis_newData_corrected.Rmd/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" />
+PC3 versus PC4</p>
+<pre class="r"><code>ggplot(pcTab, aes(x=PC3, y=PC4, col = DISEASE, shape= MATERIAL)) +
+    geom_point() +
+    ggrepel::geom_text_repel(aes(label = SC_ALIQUOT_ID)) +
+    theme_bw()</code></pre>
+<p><img src="figure/exploratoryAnalysis_newData_corrected.Rmd/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="test-associations-between-pca-and-metadata"
+class="section level3">
+<h3>Test associations between PCA and metadata</h3>
+<pre class="r"><code>pcTab &lt;- pcRes$x[,1:20] %&gt;% 
+    as_tibble(rownames = &quot;sampleID&quot;)
+metaTab &lt;- smpAnno %&gt;%
+  select(sampleID, SEX, MATERIAL, DISEASE, ENRICHMENT, INITIAL_FREEZING, DEAD_CELL_REMOVAL, THAW_BATCH, 
+         PERCENT_VIABILITY, tumor_infiltration, Pretreatment, NPM1:Trisomy.8q24, Treatment_type, treatment_spec,chemo_pat,
+         Resp_protocol) %&gt;%
+  mutate(across(NPM1:Trisomy.8q24, as.factor))
+
+resTab &lt;- jyluMisc::testAssociation(pcTab, metaTab, joinID = &quot;sampleID&quot;) %&gt;%
+  filter(p&lt;0.05)
+head(resTab)</code></pre>
+<pre><code>  var1           var2            p
+1  PC1        DISEASE 4.907247e-41
+2  PC1     ENRICHMENT 1.800891e-35
+3  PC1 Treatment_type 2.882743e-22
+4  PC1 treatment_spec 1.435501e-20
+5  PC1      chemo_pat 1.851962e-09
+6 PC15        DISEASE 3.044460e-06</code></pre>
+<pre class="r"><code>pcTab.prot &lt;- pcTab</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur/Monterey 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] forcats_0.5.1               stringr_1.4.1              
+ [3] dplyr_1.0.9                 purrr_0.3.4                
+ [5] readr_2.1.2                 tidyr_1.2.0                
+ [7] tibble_3.1.8                ggplot2_3.4.1              
+ [9] tidyverse_1.3.2             SummarizedExperiment_1.26.1
+[11] Biobase_2.56.0              GenomicRanges_1.48.0       
+[13] GenomeInfoDb_1.32.2         IRanges_2.30.0             
+[15] S4Vectors_0.34.0            BiocGenerics_0.42.0        
+[17] MatrixGenerics_1.8.1        matrixStats_0.62.0         
+
+loaded via a namespace (and not attached):
+  [1] DEP_1.18.0             utf8_1.2.2             shinydashboard_0.7.2  
+  [4] gmm_1.6-6              tidyselect_1.1.2       RSQLite_2.2.15        
+  [7] AnnotationDbi_1.58.0   htmlwidgets_1.5.4      grid_4.2.0            
+ [10] BiocParallel_1.30.3    norm_1.0-10.0          maxstat_0.7-25        
+ [13] munsell_0.5.0          codetools_0.2-18       preprocessCore_1.58.0 
+ [16] DT_0.23                withr_2.5.0            colorspace_2.0-3      
+ [19] highr_0.9              knitr_1.39             rstudioapi_0.13       
+ [22] ggsignif_0.6.3         mzID_1.34.0            labeling_0.4.2        
+ [25] git2r_0.30.1           slam_0.1-50            GenomeInfoDbData_1.2.8
+ [28] KMsurv_0.1-5           bit64_4.0.5            farver_2.1.1          
+ [31] rprojroot_2.0.3        vctrs_0.5.2            generics_0.1.3        
+ [34] TH.data_1.1-1          xfun_0.31              sets_1.0-21           
+ [37] R6_2.5.1               doParallel_1.0.17      clue_0.3-61           
+ [40] MsCoreUtils_1.8.0      fgsea_1.22.0           bitops_1.0-7          
+ [43] cachem_1.0.6           DelayedArray_0.22.0    assertthat_0.2.1      
+ [46] promises_1.2.0.1       scales_1.2.0           vroom_1.5.7           
+ [49] multcomp_1.4-19        googlesheets4_1.0.0    gtable_0.3.0          
+ [52] affy_1.74.0            sandwich_3.0-2         workflowr_1.7.0       
+ [55] rlang_1.0.6            genefilter_1.78.0      mzR_2.30.0            
+ [58] GlobalOptions_0.1.2    splines_4.2.0          rstatix_0.7.0         
+ [61] gargle_1.2.0           impute_1.70.0          hexbin_1.28.2         
+ [64] broom_1.0.0            BiocManager_1.30.18    yaml_2.3.5            
+ [67] abind_1.4-5            modelr_0.1.8           backports_1.4.1       
+ [70] httpuv_1.6.6           relations_0.6-12       tools_4.2.0           
+ [73] gplots_3.1.3           affyio_1.66.0          ellipsis_0.3.2        
+ [76] jquerylib_0.1.4        RColorBrewer_1.1-3     MSnbase_2.22.0        
+ [79] Rcpp_1.0.9             plyr_1.8.7             visNetwork_2.1.0      
+ [82] zlibbioc_1.42.0        RCurl_1.98-1.7         ggpubr_0.4.0          
+ [85] GetoptLong_1.0.5       cowplot_1.1.1          zoo_1.8-10            
+ [88] haven_2.5.0            ggrepel_0.9.1          cluster_2.1.3         
+ [91] exactRankTests_0.8-35  fs_1.5.2               magrittr_2.0.3        
+ [94] data.table_1.14.8      circlize_0.4.15        survminer_0.4.9       
+ [97] reprex_2.0.1           googledrive_2.0.0      pcaMethods_1.88.0     
+[100] mvtnorm_1.1-3          ProtGenerics_1.28.0    shinyjs_2.1.0         
+[103] hms_1.1.1              mime_0.12              evaluate_0.15         
+[106] xtable_1.8-4           XML_3.99-0.10          readxl_1.4.0          
+[109] gridExtra_2.3          shape_1.4.6            compiler_4.2.0        
+[112] KernSmooth_2.23-20     ncdf4_1.19             crayon_1.5.2          
+[115] htmltools_0.5.4        later_1.3.0            tzdb_0.3.0            
+[118] lubridate_1.8.0        DBI_1.1.3              dbplyr_2.2.1          
+[121] ComplexHeatmap_2.12.1  MASS_7.3-58            tmvtnorm_1.5          
+[124] jyluMisc_0.1.5         Matrix_1.5-4           car_3.1-0             
+[127] cli_3.4.1              vsn_3.64.0             imputeLCMD_2.1        
+[130] marray_1.74.0          igraph_1.3.4           parallel_4.2.0        
+[133] km.ci_0.5-6            pkgconfig_2.0.3        piano_2.12.0          
+[136] MALDIquant_1.21        xml2_1.3.3             foreach_1.5.2         
+[139] annotate_1.74.0        bslib_0.4.1            XVector_0.36.0        
+[142] drc_3.0-1              rvest_1.0.2            digest_0.6.30         
+[145] Biostrings_2.64.0      fastmatch_1.1-3        rmarkdown_2.14        
+[148] cellranger_1.1.0       survMisc_0.5.6         shiny_1.7.4           
+[151] gtools_3.9.3           rjson_0.2.21           lifecycle_1.0.3       
+[154] jsonlite_1.8.3         carData_3.0-5          limma_3.52.2          
+[157] fansi_1.0.3            pillar_1.8.0           lattice_0.20-45       
+[160] KEGGREST_1.36.3        fastmap_1.1.0          httr_1.4.3            
+[163] plotrix_3.8-2          survival_3.4-0         glue_1.6.2            
+[166] png_0.1-7              iterators_1.0.14       bit_4.0.4             
+[169] stringi_1.7.8          sass_0.4.2             blob_1.2.3            
+[172] caTools_1.18.2         memoise_2.0.1         </code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

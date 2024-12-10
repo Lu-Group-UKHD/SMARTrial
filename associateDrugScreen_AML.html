@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Associate drug response profile with proteomics and metabolomics</title>
+
+<script src="site_libs/header-attrs-2.14/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SMARTrial</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Associate drug response profile with
+proteomics and metabolomics</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2024-05-31
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>SMARTrial/analysis/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20220425code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20220425)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20220425code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20220425)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongnoversioncontrol">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>Repository version:</strong> no
+version control </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongnoversioncontrol"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Tracking code development and connecting the code version to the
+results is critical for reproducibility. To start using Git, open the
+Terminal and type <code>git init</code> in your project directory.</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+This project is not being versioned with Git. To obtain the full
+reproducibility benefits of using workflowr, please see
+<code>?wflow_start</code>.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="load-packages-and-datasets" class="section level1">
+<h1>Load packages and datasets</h1>
+</div>
+<div id="associations-with-proteomics" class="section level1">
+<h1>Associations with proteomics</h1>
+<div id="select-aml-samples" class="section level2">
+<h2>Select AML samples</h2>
+<pre class="r"><code>seProt &lt;- protSmart[,protSmart$DISEASE == &quot;AML&quot;]
+colnames(seProt) &lt;- seProt$SMART_ID</code></pre>
+</div>
+<div id="get-overlapped-samples-between-drug-screening-and-proteomics"
+class="section level2">
+<h2>Get overlapped samples between Drug screening and proteomics</h2>
+<pre class="r"><code>overPat &lt;- intersect(seProt$SMART_ID, seDrug_conc$patientID)
+seProt &lt;- seProt[,seProt$SMART_ID %in% overPat]
+seDrug_auc &lt;- seDrug_auc[,seDrug_auc$patientID %in% overPat]
+seDrug_conc &lt;- seDrug_conc[,seDrug_conc$patientID %in% overPat]
+viabTab &lt;- viabTab %&gt;% filter(patientID %in% overPat)</code></pre>
+</div>
+<div id="keep-proteins-with-over-50-completeness-after-subset"
+class="section level2">
+<h2>Keep proteins with over 50% completeness after subset</h2>
+<pre class="r"><code>seProt &lt;- seProt[rowMeans(is.na(assay(seProt)))&lt;=0.5,]</code></pre>
+</div>
+<div id="dimensions" class="section level2">
+<h2>Dimensions</h2>
+<p>Protein</p>
+<pre class="r"><code>dim(seProt)</code></pre>
+<pre><code>[1] 7982   20</code></pre>
+<p>Drugs</p>
+<pre class="r"><code>dim(seDrug_auc)</code></pre>
+<pre><code>[1] 107  20</code></pre>
+</div>
+</div>
+<div id="correlate-drug-responses-with-protein-expression"
+class="section level1">
+<h1>Correlate drug responses with protein expression</h1>
+<pre class="r"><code>testDrugAssociations &lt;- function(seDrug, seProt) {
+  drugMat &lt;- assay(seDrug)
+  protMat &lt;- assay(seProt)
+  overlapCol &lt;- intersect(colnames(drugMat), colnames(protMat))
+  
+  resTab &lt;- BiocParallel::bplapply(seq(nrow(drugMat)), function(i) {
+    modelMat &lt;- data.frame(row.names = colnames(drugMat), viab = drugMat[i,])
+    designMat &lt;- model.matrix(~viab, modelMat)
+    testMat &lt;- protMat[,rownames(designMat)]
+    fit &lt;- lmFit(testMat, design = designMat)
+    fit2 &lt;- eBayes(fit)
+    res &lt;- topTable(fit2, number = Inf, coef = &quot;viab&quot;) %&gt;%
+      as_tibble(rownames = &quot;protID&quot;) %&gt;% 
+      mutate(Drug = rownames(drugMat)[i], nSample = nrow(designMat)) 
+  }) %&gt;%
+    bind_rows()
+  return(resTab)
+}</code></pre>
+<div id="at-auc-level" class="section level2">
+<h2>At AUC level</h2>
+<p>Perform hypothesis testing</p>
+<pre class="r"><code>seDrug &lt;- seDrug_auc
+resTab &lt;- testDrugAssociations(seDrug, seProt)</code></pre>
+<p>Add annotations</p>
+<pre class="r"><code>resTab &lt;- arrange(resTab, P.Value) %&gt;%
+  mutate(symbol = rowData(seProt[protID,])$Genes)</code></pre>
+<p>Number of associations per-drug</p>
+<pre class="r"><code>sumDrugTab &lt;- filter(resTab, adj.P.Val &lt; 0.05) %&gt;%
+  group_by(Drug) %&gt;%
+  summarise(n=length(protID)) %&gt;%
+  arrange(desc(n)) %&gt;%
+  mutate(Drug = factor(Drug, levels = Drug))
+
+ggplot(sumDrugTab, aes(x=Drug, y=n)) +
+  geom_bar(stat = &quot;identity&quot;) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ylab(&quot;Number of associated proteins\n(5% FDR)&quot;)</code></pre>
+<p><img src="figure/associateDrugScreen_AML.Rmd/unnamed-chunk-9-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>Number of associations per-protein</p>
+<pre class="r"><code>sumProtTab &lt;- filter(resTab, adj.P.Val &lt; 0.05) %&gt;%
+  group_by(protID) %&gt;%
+  summarise(n=length(Drug)) %&gt;%
+  arrange(desc(n)) %&gt;%
+  mutate(symbol = rowData(seProt[protID,])$Genes) %&gt;% 
+  mutate(symbol = factor(symbol, levels = symbol)) %&gt;%
+  filter(n&gt;=5)
+
+ggplot(sumProtTab, aes(x=symbol, y=n)) +
+  geom_bar(stat = &quot;identity&quot;) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ylab(&quot;Number of assoicated drugs/n(5% FDR)&quot;)</code></pre>
+<p><img src="figure/associateDrugScreen_AML.Rmd/unnamed-chunk-10-1.png" width="1440" style="display: block; margin: auto;" /></p>
+<p>Protein drug association heatmap</p>
+<pre class="r"><code>plotTab &lt;- resTab %&gt;% filter(adj.P.Val &lt; 0.05) %&gt;%
+  #filter(Drug %in% filter(sumDrugTab,n&gt;=1)$Drug) %&gt;%
+  filter(protID %in% filter(sumProtTab, n&gt;=3)$protID) %&gt;%
+  mutate(pSign = -log10(adj.P.Val)*sign(t)) %&gt;%
+  select(symbol, Drug, pSign) %&gt;%
+  pivot_wider(names_from = Drug, values_from = pSign) %&gt;%
+  mutate(across(-symbol, replace_na, 0)) %&gt;%
+  column_to_rownames(&quot;symbol&quot;) %&gt;% data.frame()</code></pre>
+<pre><code>Warning: There was 1 warning in `mutate()`.
+ℹ In argument: `across(-symbol, replace_na, 0)`.
+Caused by warning:
+! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+Supply arguments directly to `.fns` through an anonymous function instead.
+
+  # Previously
+  across(a:b, mean, na.rm = TRUE)
+
+  # Now
+  across(a:b, \(x) mean(x, na.rm = TRUE))</code></pre>
+<pre class="r"><code>breaks &lt;- seq(-5,5, length.out =100)
+pheatmap::pheatmap(plotTab, clustering_method = &quot;ward.D2&quot;,
+                   color=colorRampPalette(c(&quot;navy&quot;, &quot;white&quot;, &quot;red&quot;))(100),
+                   breaks = breaks)</code></pre>
+<p><img src="figure/associateDrugScreen_AML.Rmd/unnamed-chunk-11-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="associations-with-metabolomics" class="section level1">
+<h1>Associations with metabolomics</h1>
+<div id="select-aml-samples-1" class="section level2">
+<h2>Select AML samples</h2>
+<pre class="r"><code>seMeta &lt;- metaSmart
+seMeta &lt;- seMeta[,seMeta$DISEASE == &quot;AML&quot;]
+colnames(seMeta) &lt;- seMeta$SMART_ID</code></pre>
+</div>
+<div id="get-overlapped-samples-between-drug-screening-and-proteomics-1"
+class="section level2">
+<h2>Get overlapped samples between Drug screening and proteomics</h2>
+<pre class="r"><code>overPat &lt;- intersect(seMeta$SMART_ID, seDrug_conc$patientID)
+seMeta &lt;- seMeta[,seMeta$SMART_ID %in% overPat]
+seDrug_auc &lt;- seDrug_auc[,seDrug_auc$patientID %in% overPat]
+seDrug_conc &lt;- seDrug_conc[,seDrug_conc$patientID %in% overPat]
+viabTab &lt;- viabTab %&gt;% filter(patientID %in% overPat)</code></pre>
+</div>
+<div id="keep-proteins-with-over-50-completeness-after-subset-1"
+class="section level2">
+<h2>Keep proteins with over 50% completeness after subset</h2>
+<pre class="r"><code>seMeta &lt;- seMeta[rowMeans(is.na(assay(seMeta)))&lt;=0.5,]</code></pre>
+</div>
+<div id="dimensions-1" class="section level2">
+<h2>Dimensions</h2>
+<p>Metabolites</p>
+<pre class="r"><code>dim(seMeta)</code></pre>
+<pre><code>[1] 478  20</code></pre>
+<p>Drugs</p>
+<pre class="r"><code>dim(seDrug_auc)</code></pre>
+<pre><code>[1] 107  20</code></pre>
+</div>
+</div>
+<div id="correlate-drug-responses-with-protein-expression-1"
+class="section level1">
+<h1>Correlate drug responses with protein expression</h1>
+<pre class="r"><code>testDrugAssociations &lt;- function(seDrug, seMeta) {
+  drugMat &lt;- assay(seDrug)
+  metaMat &lt;- assay(seMeta)
+  overlapCol &lt;- intersect(colnames(drugMat), colnames(metaMat))
+  
+  resTab &lt;- BiocParallel::bplapply(seq(nrow(drugMat)), function(i) {
+    modelMat &lt;- data.frame(row.names = colnames(drugMat), viab = drugMat[i,])
+    designMat &lt;- model.matrix(~viab, modelMat)
+    testMat &lt;- metaMat[,rownames(designMat)]
+    fit &lt;- lmFit(testMat, design = designMat)
+    fit2 &lt;- eBayes(fit)
+    res &lt;- topTable(fit2, number = Inf, coef = &quot;viab&quot;) %&gt;%
+      as_tibble(rownames = &quot;metabolite&quot;) %&gt;% 
+      mutate(Drug = rownames(drugMat)[i], nSample = nrow(designMat)) 
+  }) %&gt;%
+    bind_rows()
+  return(resTab)
+}</code></pre>
+<div id="at-auc-level-1" class="section level2">
+<h2>At AUC level</h2>
+<p>Perform hypothesis testing</p>
+<pre class="r"><code>seDrug &lt;- seDrug_auc
+resTab &lt;- testDrugAssociations(seDrug, seMeta)</code></pre>
+<p>Number of associations per-drug</p>
+<pre class="r"><code>sumDrugTab &lt;- filter(resTab, adj.P.Val &lt; 0.1) %&gt;%
+  group_by(Drug) %&gt;%
+  summarise(n=length(metabolite)) %&gt;%
+  arrange(desc(n)) %&gt;%
+  mutate(Drug = factor(Drug, levels = Drug))
+
+ggplot(sumDrugTab, aes(x=Drug, y=n)) +
+  geom_bar(stat = &quot;identity&quot;) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ylab(&quot;Number of associated proteins\n(10% FDR)&quot;)</code></pre>
+<p><img src="figure/associateDrugScreen_AML.Rmd/unnamed-chunk-19-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>Number of associations per-metabolite</p>
+<pre class="r"><code>sumProtTab &lt;- filter(resTab, adj.P.Val &lt; 0.10) %&gt;%
+  group_by(metabolite) %&gt;%
+  summarise(n=length(Drug)) %&gt;%
+  arrange(desc(n)) %&gt;%
+  #mutate(symbol = rowData(seProt[protID,])$Genes) %&gt;% 
+  mutate(metabolite = factor(metabolite, levels = metabolite)) %&gt;%
+  filter(n&gt;=2)
+
+ggplot(sumProtTab, aes(x=metabolite, y=n)) +
+  geom_bar(stat = &quot;identity&quot;) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ylab(&quot;Number of assoicated drugs/n(5% FDR)&quot;)</code></pre>
+<p><img src="figure/associateDrugScreen_AML.Rmd/unnamed-chunk-20-1.png" width="1440" style="display: block; margin: auto;" /></p>
+<p>metabolite drug association heatmap</p>
+<pre class="r"><code>plotTab &lt;- resTab %&gt;% filter(adj.P.Val &lt; 0.1) %&gt;%
+  #filter(Drug %in% filter(sumDrugTab,n&gt;=1)$Drug) %&gt;%
+  #filter(protID %in% filter(sumProtTab, n&gt;=3)$protID) %&gt;%
+  mutate(pSign = -log10(adj.P.Val)*sign(t)) %&gt;%
+  select(metabolite, Drug, pSign) %&gt;%
+  pivot_wider(names_from = Drug, values_from = pSign) %&gt;%
+  mutate(across(-metabolite, replace_na, 0)) %&gt;%
+  column_to_rownames(&quot;metabolite&quot;) %&gt;% data.frame()
+
+breaks &lt;- seq(-5,5, length.out =100)
+pheatmap::pheatmap(plotTab, clustering_method = &quot;ward.D2&quot;,
+                   color=colorRampPalette(c(&quot;navy&quot;, &quot;white&quot;, &quot;red&quot;))(100),
+                   breaks = breaks)</code></pre>
+<p><img src="figure/associateDrugScreen_AML.Rmd/unnamed-chunk-21-1.png" width="480" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur/Monterey 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] forcats_0.5.1               stringr_1.4.1              
+ [3] dplyr_1.1.4.9000            purrr_0.3.4                
+ [5] readr_2.1.2                 tidyr_1.2.0                
+ [7] tibble_3.2.1                ggplot2_3.4.1              
+ [9] tidyverse_1.3.2             SummarizedExperiment_1.26.1
+[11] Biobase_2.56.0              GenomicRanges_1.48.0       
+[13] GenomeInfoDb_1.32.2         IRanges_2.30.0             
+[15] S4Vectors_0.34.0            BiocGenerics_0.42.0        
+[17] MatrixGenerics_1.8.1        matrixStats_0.62.0         
+[19] limma_3.52.2               
+
+loaded via a namespace (and not attached):
+ [1] bitops_1.0-7           fs_1.5.2               lubridate_1.8.0       
+ [4] RColorBrewer_1.1-3     httr_1.4.3             rprojroot_2.0.3       
+ [7] tools_4.2.0            backports_1.4.1        bslib_0.4.1           
+[10] utf8_1.2.4             R6_2.5.1               DBI_1.1.3             
+[13] colorspace_2.0-3       withr_3.0.0            tidyselect_1.2.1      
+[16] compiler_4.2.0         git2r_0.30.1           cli_3.6.2             
+[19] rvest_1.0.2            xml2_1.3.3             DelayedArray_0.22.0   
+[22] labeling_0.4.2         sass_0.4.2             scales_1.2.0          
+[25] digest_0.6.30          rmarkdown_2.14         XVector_0.36.0        
+[28] pkgconfig_2.0.3        htmltools_0.5.4        highr_0.9             
+[31] dbplyr_2.2.1           fastmap_1.1.0          rlang_1.1.3           
+[34] readxl_1.4.0           rstudioapi_0.13        farver_2.1.1          
+[37] jquerylib_0.1.4        generics_0.1.3         jsonlite_1.8.3        
+[40] BiocParallel_1.30.3    googlesheets4_1.0.0    RCurl_1.98-1.7        
+[43] magrittr_2.0.3         GenomeInfoDbData_1.2.8 Matrix_1.5-4          
+[46] Rcpp_1.0.9             munsell_0.5.0          fansi_1.0.6           
+[49] lifecycle_1.0.4        stringi_1.7.8          yaml_2.3.5            
+[52] zlibbioc_1.42.0        grid_4.2.0             parallel_4.2.0        
+[55] promises_1.2.0.1       crayon_1.5.2           lattice_0.20-45       
+[58] haven_2.5.0            hms_1.1.1              knitr_1.39            
+[61] pillar_1.9.0           codetools_0.2-18       reprex_2.0.1          
+[64] glue_1.7.0             evaluate_0.15          modelr_0.1.8          
+[67] vctrs_0.6.5            tzdb_0.3.0             httpuv_1.6.6          
+[70] cellranger_1.1.0       gtable_0.3.0           assertthat_0.2.1      
+[73] cachem_1.0.6           xfun_0.31              broom_1.0.0           
+[76] later_1.3.0            googledrive_2.0.0      gargle_1.2.0          
+[79] pheatmap_1.0.12        workflowr_1.7.0        ellipsis_0.3.2        </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
